@@ -14,7 +14,7 @@ use Tpetry\MultiRegion\Testing\MultiRegionState;
  * @method static void cleanupOldCommitIds()
  * @method static bool hasCaughtUp()
  * @method static void recordWrite()
- * @method static \Illuminate\Http\RedirectResponse createRedirectToPrimaryRegion()
+ * @method static \Illuminate\Http\RedirectResponse createRedirectToWriteUrl()
  * @method static void assertWriteRecorded(bool $value)
  * @method static void assertOldCommitIdsCleanedUp()
  *

@@ -6,16 +6,44 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Primary Instance URL
+    | Primary Region
     |--------------------------------------------------------------------------
     |
-    | The URL of the primary region's instance. Leave it empty in the primary
-    | region itself. When it's set, this instance is part of a replica region
-    | and forwards requests to the primary region.
+    | Whether this instance is part of the primary region. Set it to true in
+    | the primary region and to false in every replica region, so that this
+    | instance forwards requests to the primary region when they can't be
+    | handled locally.
     |
     */
 
-    'primary_url' => env('MULTIREGION_PRIMARY_URL'),
+    'primary' => env('MULTIREGION_PRIMARY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Endpoint URLs
+    |--------------------------------------------------------------------------
+    |
+    | The URLs of the endpoints handling write and read requests. The write
+    | URL must lead to the primary region, as only it can write data. The
+    | read URL can lead to any region, for example to a load balancer that
+    | sends each user to their nearest region.
+    |
+    | They are used to generate URLs for routes with the multiRegionWrite()
+    | or multiRegionRead() route modifiers: a write route always points to
+    | the write URL and a read route always points to the read URL instead
+    | of the current instance. Links and forms therefore go directly to an
+    | endpoint that can handle them, which saves a redirect.
+    |
+    | Requests can still reach a region that can't handle them, e.g.
+    | manually generated URLs or when the read region hasn't received the
+    | user's last write yet. The middleware these redirects then.
+    |
+    */
+
+    'url' => [
+        'read' => env('MULTIREGION_URL_READ'),
+        'write' => env('MULTIREGION_URL_WRITE'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

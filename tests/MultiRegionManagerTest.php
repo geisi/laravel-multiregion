@@ -19,22 +19,19 @@ beforeEach(function () {
 });
 
 describe('isPrimary()', function () {
-    it('is the primary region without a primary url', function (?string $primaryUrl) {
-        config(['multiregion.primary_url' => $primaryUrl]);
+    it('fails when the region is not configured', function () {
+        (new MultiRegionManager)->isPrimary();
+    })->throws(InvalidArgumentException::class, 'Configuration value for key [multiregion.primary] must be a boolean, NULL given.');
+
+    it('is the primary region when configured', function (bool $primary) {
+        config(['multiregion.primary' => $primary]);
 
         expect((new MultiRegionManager)->isPrimary())
-            ->toBeTrue();
+            ->toBe($primary);
     })->with([
-        'no url' => [null],
-        'empty url' => [''],
+        'primary' => [true],
+        'replica' => [false],
     ]);
-
-    it('is not the primary region with a primary url', function () {
-        config(['multiregion.primary_url' => 'https://primary.test']);
-
-        expect((new MultiRegionManager)->isPrimary())
-            ->toBeFalse();
-    });
 });
 
 describe('cleanupOldCommitIds()', function () {
@@ -191,12 +188,16 @@ describe('hasCaughtUp()', function () {
     });
 });
 
-describe('createRedirectToPrimaryRegion()', function () {
-    it('redirects to the same url in the primary region', function (string $primaryUrl, string $expected) {
-        config(['multiregion.primary_url' => $primaryUrl]);
+describe('createRedirectToWriteUrl()', function () {
+    it('redirects to the same path at the write url', function (string $writeUrl, string $expected) {
+        config([
+            'app.url' => 'https://app.test',
+            'multiregion.url.read' => 'https://replica.test',
+            'multiregion.url.write' => $writeUrl,
+        ]);
         Request::swap(Request::create('http://replica.test:8080/posts/%C3%A4?tags[]=x&tags[]=y&a=1&a=2&flag&user.name=x&q=a+b'));
 
-        $response = (new MultiRegionManager)->createRedirectToPrimaryRegion();
+        $response = (new MultiRegionManager)->createRedirectToWriteUrl();
 
         expect($response)
             ->getStatusCode()->toBe(307)

@@ -24,10 +24,6 @@ describe('primary region', function () {
 });
 
 describe('replica region', function () {
-    beforeEach(function () {
-        config(['multiregion.primary_url' => 'https://primary.test']);
-    });
-
     it('passes requests through when the data has arrived', function () {
         MultiRegion::fake(MultiRegionState::ReplicaCaughtUp);
 
@@ -40,6 +36,11 @@ describe('replica region', function () {
 
     it('redirects to the primary region when the data has not arrived', function () {
         MultiRegion::fake(MultiRegionState::ReplicaLagging);
+        config([
+            'app.url' => 'https://app.test',
+            'multiregion.url.read' => 'https://replica.test',
+            'multiregion.url.write' => 'https://primary.test',
+        ]);
 
         $this->get('/posts?b=2&a=1')
             ->assertStatus(307)

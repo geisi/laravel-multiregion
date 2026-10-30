@@ -22,6 +22,6 @@ class MultiRegionRead
             return $next($request);
         }
 
-        return MultiRegion::createRedirectToPrimaryRegion();
+        return MultiRegion::createRedirectToWriteUrl();
     }
 }

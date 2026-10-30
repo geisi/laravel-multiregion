@@ -20,9 +20,7 @@ class MultiRegionManager
      */
     public function isPrimary(): bool
     {
-        $primaryUrl = config('multiregion.primary_url');
-
-        return blank($primaryUrl);
+        return config()->boolean('multiregion.primary');
     }
 
     /**
@@ -94,15 +92,15 @@ class MultiRegionManager
     }
 
     /**
-     * Redirect the current request to the same URL in the primary region.
+     * Redirect the current request to the same path at the write URL.
      */
-    public function createRedirectToPrimaryRegion(): RedirectResponse
+    public function createRedirectToWriteUrl(): RedirectResponse
     {
         // The raw query string is set on the underlying League URI because Uri::withQuery() only accepts an array which
         // is not the exact query string passed to this request. Minor differences due to parsing the query string into
         // an array and serializing it again could e.g. break signed URLs or have different behavior with duplicate
         // values etc.
-        $uri = Uri::of(config()->string('multiregion.primary_url'))
+        $uri = Uri::of(config()->string('multiregion.url.write'))
             ->withPath(Request::getBaseUrl().Request::getPathInfo())
             ->getUri()
             ->withQuery(Request::instance()->server->getString('QUERY_STRING') ?: null);

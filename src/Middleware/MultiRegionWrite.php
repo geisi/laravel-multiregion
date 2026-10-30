@@ -19,7 +19,7 @@ class MultiRegionWrite
         MultiRegion::cleanupOldCommitIds();
 
         if (! MultiRegion::isPrimary()) {
-            return MultiRegion::createRedirectToPrimaryRegion();
+            return MultiRegion::createRedirectToWriteUrl();
         }
 
         try {

@@ -36,12 +36,13 @@ describe('primary region', function () {
 });
 
 describe('replica region', function () {
-    beforeEach(function () {
-        config(['multiregion.primary_url' => 'https://primary.test']);
-    });
-
     it('redirects to the primary region', function () {
         MultiRegion::fake(MultiRegionState::ReplicaCaughtUp);
+        config([
+            'app.url' => 'https://app.test',
+            'multiregion.url.read' => 'https://replica.test',
+            'multiregion.url.write' => 'https://primary.test',
+        ]);
 
         $this->post('/posts?b=2&a=1')
             ->assertStatus(307)
