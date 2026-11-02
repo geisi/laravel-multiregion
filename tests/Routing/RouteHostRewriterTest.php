@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\URL;
 use Tpetry\MultiRegion\Middleware\MultiRegionRead;
 use Tpetry\MultiRegion\Middleware\MultiRegionWrite;
 
 beforeEach(function () {
-    URL::useOrigin('http://current.test');
+    app('url')->setRequest(Request::create('http://current.test'));
     config([
         'multiregion.url.read' => 'https://read.test',
         'multiregion.url.write' => 'https://write.test',
@@ -50,7 +50,7 @@ it('keeps the current host when the multi-region middleware is excluded', functi
 it('keeps a manually set domain', function () {
     Route::domain('tenant.test')->middleware(MultiRegionWrite::class)->name('target')->post('/posts', fn () => 'ok');
 
-    expect(route('target'))->toBe('http://tenant.test:'.request()->getPort().'/posts');
+    expect(route('target'))->toBe('http://tenant.test/posts');
 });
 
 it('does not change URLs without a route', function () {
