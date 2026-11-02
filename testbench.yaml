@@ -1,0 +1,4 @@
+# Used by Larastan to boot the application for PHPStan. Without the provider, the route macros (multiRegionRead() etc.)
+# are not registered and PHPStan reports them as undefined methods.
+providers:
+  - Tpetry\MultiRegion\MultiRegionServiceProvider
