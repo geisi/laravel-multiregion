@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Tpetry\MultiRegion;
 
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Uri;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
+use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Facades\CommitId;
 
 class MultiRegionManager
@@ -92,19 +91,10 @@ class MultiRegionManager
     }
 
     /**
-     * Redirect the current request to the same path at the write URL.
+     * Replay the current request at the primary region.
      */
-    public function createRedirectToWriteUrl(): RedirectResponse
+    public function replayAtPrimary(): Response
     {
-        // The raw query string is set on the underlying League URI because Uri::withQuery() only accepts an array which
-        // is not the exact query string passed to this request. Minor differences due to parsing the query string into
-        // an array and serializing it again could e.g. break signed URLs or have different behavior with duplicate
-        // values etc.
-        $uri = Uri::of(config()->string('multiregion.url.write'))
-            ->withPath(Request::getBaseUrl().Request::getPathInfo())
-            ->getUri()
-            ->withQuery(Request::instance()->server->getString('QUERY_STRING') ?: null);
-
-        return redirect()->away($uri->toString(), Response::HTTP_TEMPORARY_REDIRECT);
+        return app(Driver::class)->replayAtPrimary(Request::instance());
     }
 }

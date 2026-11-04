@@ -20,29 +20,95 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Endpoint URLs
+    | Driver
     |--------------------------------------------------------------------------
     |
-    | The URLs of the endpoints handling write and read requests. The write
-    | URL must lead to the primary region, as only it can write data. The
-    | read URL can lead to any region, for example to a load balancer that
-    | sends each user to their nearest region.
+    | The driver defines how a request is repeated at the primary region when
+    | a replica region can't handle it. Applications have different
+    | capabilities and requirements, so choose the one fitting yours. It may
+    | even be different for development than for production, e.g. when no
+    | proxy is available locally to replay requests.
     |
-    | They are used to generate URLs for routes with the multiRegionWrite()
-    | or multiRegionRead() route modifiers: a write route always points to
-    | the write URL and a read route always points to the read URL instead
-    | of the current instance. Links and forms therefore go directly to an
-    | endpoint that can handle them, which saves a redirect.
-    |
-    | Requests can still reach a region that can't handle them, e.g.
-    | manually generated URLs or when the read region hasn't received the
-    | user's last write yet. The middleware these redirects then.
+    | Supported: "redirect", "header", "fly"
     |
     */
 
-    'url' => [
-        'read' => env('MULTIREGION_URL_READ'),
-        'write' => env('MULTIREGION_URL_WRITE'),
+    'driver' => env('MULTIREGION_DRIVER'),
+
+    'drivers' => [
+
+        /*
+        |----------------------------------------------------------------------
+        | Redirect Between Primary and Replica
+        |----------------------------------------------------------------------
+        |
+        | This driver will probably be used most in development. There is one
+        | URL for the primary region and one for all replica regions. Writes are
+        | sent to the primary region's URL, reads to the replica region.
+        | Load-balancing should select the fastest one for the user.
+        |
+        | All requests can still be sent to a replica region although it can't
+        | handle them, e.g. a write route or a read before the user's last write
+        | has arrived. The middleware detects this and redirects the user to
+        | primary region.
+        |
+        | The write URL is used to redirect requests from a replica region to
+        | the primary region. The read URL is used when generating URLs for read
+        | routes, so that links generated at the primary region can still be
+        | handled by the region with the lowest latency for the user.
+        |
+        */
+
+        'redirect' => [
+            'url' => [
+                'read' => env('MULTIREGION_REDIRECT_URL_READ'),
+                'write' => env('MULTIREGION_REDIRECT_URL_WRITE'),
+            ],
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Response Header
+        |----------------------------------------------------------------------
+        |
+        | All requests are always sent to the application's standard URL, which
+        | leads to all regions. When a replica region can't handle a request,
+        | e.g. a write route or a read before the user's last write has arrived,
+        | it responds with a header containing the absolute URL at which the
+        | request should be replayed in the primary region, e.g.:
+        |
+        |     X-MultiRegion-Replay: https://primary.example.com/posts
+        |
+        | The replay itself must be implemented in front of the application,
+        | e.g. with a Cloudflare Worker that sends the request again to the URL
+        | in the header and returns that response to the user.
+        |
+        */
+
+        'header' => [
+
+            'name' => env('MULTIREGION_HEADER_NAME', 'X-MultiRegion-Replay'),
+
+            'url' => env('MULTIREGION_HEADER_URL'),
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Fly.io Replay
+        |----------------------------------------------------------------------
+        |
+        | Fly.io's proxy natively replays requests in another region when the
+        | application responds with a fly-replay header. The target defines
+        | where the request is replayed, e.g. "region=ams" for the primary
+        | region. See the docs for configuration options:
+        | https://docs.fly.io/networking/dynamic-request-routing
+        |
+        */
+
+        'fly' => [
+            'target' => env('MULTIREGION_FLYREPLAY_TARGET'),
+        ],
+
     ],
 
     /*

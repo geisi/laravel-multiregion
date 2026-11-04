@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace Tpetry\MultiRegion;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
+use Tpetry\MultiRegion\Contracts\Driver;
+use Tpetry\MultiRegion\Contracts\FormatsRouteHost;
+use Tpetry\MultiRegion\Drivers\FlyReplay;
+use Tpetry\MultiRegion\Drivers\Header;
+use Tpetry\MultiRegion\Drivers\Redirect;
 use Tpetry\MultiRegion\Helpers\CommitId;
-use Tpetry\MultiRegion\Routing\RouteHostRewriter;
 use Tpetry\MultiRegion\Routing\RouteMixin;
 
 class MultiRegionServiceProvider extends ServiceProvider
@@ -19,11 +25,12 @@ class MultiRegionServiceProvider extends ServiceProvider
 
         $this->app->singleton(CommitId::class);
         $this->app->singleton(MultiRegionManager::class);
+        $this->app->singleton(Driver::class, $this->buildDriver(...));
 
         Route::mixin(new RouteMixin);
 
         $this->callAfterResolving('url', function (UrlGenerator $url): void {
-            $url->formatHostUsing($this->app->make(RouteHostRewriter::class)(...));
+            $url->formatHostUsing($this->formatHost(...));
         });
     }
 
@@ -36,5 +43,35 @@ class MultiRegionServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/multiregion.php' => config_path('multiregion.php'),
         ], ['multiregion-config']);
+    }
+
+    protected function buildDriver(Application $app): Driver
+    {
+        $config = $app->make('config');
+
+        return match ($driver = $config->string('multiregion.driver')) {
+            'redirect' => new Redirect(
+                readUrl: $config->get('multiregion.drivers.redirect.url.read'),
+                writeUrl: $config->get('multiregion.drivers.redirect.url.write'),
+            ),
+            'header' => new Header(
+                name: $config->string('multiregion.drivers.header.name'),
+                url: $config->string('multiregion.drivers.header.url'),
+            ),
+            'fly' => new FlyReplay(
+                target: $config->string('multiregion.drivers.fly.target'),
+            ),
+            default => throw new InvalidArgumentException("The multi-region driver [{$driver}] is not supported."),
+        };
+    }
+
+    protected function formatHost(string $root, ?Route $route): string
+    {
+        $driver = $this->app->make(Driver::class);
+
+        return match (true) {
+            $driver instanceof FormatsRouteHost => $driver->formatRouteHost($root, $route),
+            default => $root,
+        };
     }
 }

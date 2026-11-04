@@ -40,8 +40,9 @@ describe('replica region', function () {
         MultiRegion::fake(MultiRegionState::ReplicaCaughtUp);
         config([
             'app.url' => 'https://app.test',
-            'multiregion.url.read' => 'https://replica.test',
-            'multiregion.url.write' => 'https://primary.test',
+            'multiregion.driver' => 'redirect',
+            'multiregion.drivers.redirect.url.read' => 'https://replica.test',
+            'multiregion.drivers.redirect.url.write' => 'https://primary.test',
         ]);
 
         $this->post('/posts?b=2&a=1')

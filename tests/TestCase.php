@@ -18,4 +18,13 @@ abstract class TestCase extends Orchestra
             MultiRegionServiceProvider::class,
         ];
     }
+
+    /**
+     * The driver is resolved for every generated URL, including the ones Laravel's test helpers generate for requests
+     * ($this->get('/posts')). So every test needs a driver, tests for other drivers configure them explicitly.
+     */
+    protected function defineEnvironment($app): void
+    {
+        $app['config']->set('multiregion.driver', 'redirect');
+    }
 }

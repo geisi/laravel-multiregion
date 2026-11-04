@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
+use Mockery\MockInterface;
+use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Facades\CommitId;
 use Tpetry\MultiRegion\MultiRegionManager;
 use Tpetry\MultiRegion\Testing\CommitIdState;
@@ -188,24 +191,16 @@ describe('hasCaughtUp()', function () {
     });
 });
 
-describe('createRedirectToWriteUrl()', function () {
-    it('redirects to the same path at the write url', function (string $writeUrl, string $expected) {
-        config([
-            'app.url' => 'https://app.test',
-            'multiregion.url.read' => 'https://replica.test',
-            'multiregion.url.write' => $writeUrl,
-        ]);
-        Request::swap(Request::create('http://replica.test:8080/posts/%C3%A4?tags[]=x&tags[]=y&a=1&a=2&flag&user.name=x&q=a+b'));
+describe('replayAtPrimary()', function () {
+    it('passes the current request to the driver and returns its response', function () {
+        Request::swap($request = HttpRequest::create('http://replica.test/posts?b=2&a=1'));
+        $response = response('replayed');
 
-        $response = (new MultiRegionManager)->createRedirectToWriteUrl();
+        $this->mock(Driver::class, function (MockInterface $mock) use ($request, $response) {
+            $mock->expects('replayAtPrimary')->with($request)->andReturn($response);
+        });
 
-        expect($response)
-            ->getStatusCode()->toBe(307)
-            ->getTargetUrl()->toBe($expected);
-    })->with([
-        'host without slash' => ['https://primary.test', 'https://primary.test/posts/%C3%A4?tags%5B%5D=x&tags%5B%5D=y&a=1&a=2&flag&user.name=x&q=a+b'],
-        'host with slash' => ['https://primary.test/', 'https://primary.test/posts/%C3%A4?tags%5B%5D=x&tags%5B%5D=y&a=1&a=2&flag&user.name=x&q=a+b'],
-        'host with port' => ['http://primary.test:8080', 'http://primary.test:8080/posts/%C3%A4?tags%5B%5D=x&tags%5B%5D=y&a=1&a=2&flag&user.name=x&q=a+b'],
-        'host with path' => ['https://primary.test/ignored', 'https://primary.test/posts/%C3%A4?tags%5B%5D=x&tags%5B%5D=y&a=1&a=2&flag&user.name=x&q=a+b'],
-    ]);
+        expect((new MultiRegionManager)->replayAtPrimary())
+            ->toBe($response);
+    });
 });
