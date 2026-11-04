@@ -1,5 +1,34 @@
 # Release Notes
 
+## [v3.0.0](https://github.com/tpetry/laravel-multiregion/compare/2.1.0...3.0.0) - 2026-11-05
+
+### Added
+
+- Multiple drivers defining how a request is repeated at the primary region when a replica region can't handle it:
+  - `redirect`: Redirects the user to the primary region (the behavior of v2).
+  - `header`: Responds with a header (e.g. `X-MultiRegion-Replay: https://primary.example.com/posts`) used by e.g. a Cloudflare Worker to repeat the request.
+  - `fly`: Responds with Fly.io's `fly-replay` header, so Fly's proxy replays the request at the specified target.
+  
+### Breaking Changes
+
+- The configuration file has changed. Republish it or update your copy:
+  - `driver` (`MULTIREGION_DRIVER`) is new and required in every region. It has no default, so every application must set it.
+  - `url.read` and `url.write` moved to `drivers.redirect.url.read` and `drivers.redirect.url.write`.
+  - `MULTIREGION_URL_READ` and `MULTIREGION_URL_WRITE` have been renamed to `MULTIREGION_REDIRECT_URL_READ` and `MULTIREGION_REDIRECT_URL_WRITE`.
+
+#### Upgrading the environment variables
+
+To keep the behavior of v2, use the `redirect` driver:
+
+```diff
+ MULTIREGION_PRIMARY=false
+-MULTIREGION_URL_WRITE=https://primary.example.com
+-MULTIREGION_URL_READ=https://example.com
++MULTIREGION_DRIVER=redirect
++MULTIREGION_REDIRECT_URL_WRITE=https://primary.example.com
++MULTIREGION_REDIRECT_URL_READ=https://example.com
+```
+
 ## [v2.1.0](https://github.com/tpetry/laravel-multiregion/compare/2.0.0...2.1.0) - 2026-11-04
 
 ### Added
