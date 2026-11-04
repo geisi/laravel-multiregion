@@ -1,5 +1,11 @@
 # Release Notes
 
+## [v2.1.0](https://github.com/tpetry/laravel-multiregion/compare/2.0.0...2.1.0) - 2026-11-04
+
+### Added
+
+- Pest architecture expectation to ensure every route uses multi-region middleware.
+
 ## [v2.0.0](https://github.com/tpetry/laravel-multiregion/compare/1.0.0...2.0.0) - 2026-11-02
 
 ### Added
