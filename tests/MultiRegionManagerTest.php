@@ -204,3 +204,29 @@ describe('replayAtPrimary()', function () {
             ->toBe($response);
     });
 });
+
+describe('addServedByHeader()', function () {
+    it('adds the header with the configured name and value', function () {
+        config([
+            'multiregion.served_by.name' => 'X-Region',
+            'multiregion.served_by.value' => 'fra',
+        ]);
+
+        expect((new MultiRegionManager)->addServedByHeader(response('ok')))
+            ->headers->get('X-Region')->toBe('fra');
+    });
+
+    it('adds no header when name or value are empty', function (string $name, string $value) {
+        config([
+            'multiregion.served_by.name' => $name,
+            'multiregion.served_by.value' => $value,
+        ]);
+
+        expect((new MultiRegionManager)->addServedByHeader(response('ok')))
+            ->headers->has($name)->toBeFalse();
+    })->with([
+        'no name' => ['', 'fra'],
+        'no value' => ['X-Region', ''],
+        'no name and value' => ['', ''],
+    ]);
+});

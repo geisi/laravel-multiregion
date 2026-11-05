@@ -15,8 +15,10 @@ use Tpetry\MultiRegion\Testing\MultiRegionState;
  * @method static bool hasCaughtUp()
  * @method static void recordWrite()
  * @method static \Symfony\Component\HttpFoundation\Response replayAtPrimary()
+ * @method static \Symfony\Component\HttpFoundation\Response addServedByHeader(\Symfony\Component\HttpFoundation\Response $response)
  * @method static void assertWriteRecorded(bool $value)
  * @method static void assertOldCommitIdsCleanedUp()
+ * @method static void assertServedByHeaderAdded()
  *
  * @see MultiRegionManager
  * @see MultiRegionFake

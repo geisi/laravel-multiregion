@@ -23,6 +23,7 @@ describe('primary region', function () {
 
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(true);
+        MultiRegion::assertServedByHeaderAdded();
     });
 
     it('records the write for failed requests', function () {
@@ -34,6 +35,7 @@ describe('primary region', function () {
 
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(true);
+        MultiRegion::assertServedByHeaderAdded();
     });
 });
 
@@ -50,5 +52,6 @@ describe('replica region', function () {
 
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(false);
+        MultiRegion::assertServedByHeaderAdded();
     });
 });

@@ -86,9 +86,7 @@ return [
         */
 
         'header' => [
-
             'name' => env('MULTIREGION_HEADER_NAME', 'X-MultiRegion-Replay'),
-
             'url' => env('MULTIREGION_HEADER_URL'),
         ],
 
@@ -170,6 +168,22 @@ return [
 
     'verification' => [
         'milliseconds' => (int) env('MULTIREGION_VERIFICATION_MILLISECONDS', 30_000),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Served By
+    |--------------------------------------------------------------------------
+    |
+    | A header added to every response to identify the region or machine in a
+    | region that answered the request for debugging and monitoring purposes.
+    | The header is only added when a value is set.
+    |
+    */
+
+    'served_by' => [
+        'name' => env('MULTIREGION_SERVEDBY_NAME', 'X-MultiRegion-ServedBy'),
+        'value' => env('MULTIREGION_SERVEDBY_VALUE'),
     ],
 
 ];

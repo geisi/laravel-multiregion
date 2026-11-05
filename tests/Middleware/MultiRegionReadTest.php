@@ -22,6 +22,7 @@ describe('primary region', function () {
             ->assertSee('ok');
 
         MultiRegion::assertOldCommitIdsCleanedUp();
+        MultiRegion::assertServedByHeaderAdded();
     });
 });
 
@@ -34,6 +35,7 @@ describe('replica region', function () {
             ->assertSee('ok');
 
         MultiRegion::assertOldCommitIdsCleanedUp();
+        MultiRegion::assertServedByHeaderAdded();
     });
 
     it('replays the request at the primary region when the data has not arrived', function () {
@@ -47,5 +49,6 @@ describe('replica region', function () {
             ->toBe($response);
 
         MultiRegion::assertOldCommitIdsCleanedUp();
+        MultiRegion::assertServedByHeaderAdded();
     });
 });

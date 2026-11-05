@@ -6,6 +6,7 @@ namespace Tpetry\MultiRegion\Testing;
 
 use Illuminate\Support\Testing\Fakes\Fake;
 use PHPUnit\Framework\Assert as PHPUnit;
+use Symfony\Component\HttpFoundation\Response;
 use Tpetry\MultiRegion\MultiRegionManager;
 
 class MultiRegionFake extends MultiRegionManager implements Fake
@@ -13,6 +14,8 @@ class MultiRegionFake extends MultiRegionManager implements Fake
     protected bool $calledRecordWrite = false;
 
     protected bool $calledCleanupOldCommitIds = false;
+
+    protected bool $calledAddServedByHeader = false;
 
     protected bool $isPrimary;
 
@@ -47,6 +50,13 @@ class MultiRegionFake extends MultiRegionManager implements Fake
         return $this->hasCaughtUp;
     }
 
+    public function addServedByHeader(Response $response): Response
+    {
+        $this->calledAddServedByHeader = true;
+
+        return $response;
+    }
+
     public function assertWriteRecorded(bool $value): void
     {
         PHPUnit::assertSame($value, $this->calledRecordWrite, match ($value) {
@@ -58,5 +68,10 @@ class MultiRegionFake extends MultiRegionManager implements Fake
     public function assertOldCommitIdsCleanedUp(): void
     {
         PHPUnit::assertTrue($this->calledCleanupOldCommitIds, 'The old commit IDs were not cleaned up.');
+    }
+
+    public function assertServedByHeaderAdded(): void
+    {
+        PHPUnit::assertTrue($this->calledAddServedByHeader, 'The served by header was not added.');
     }
 }

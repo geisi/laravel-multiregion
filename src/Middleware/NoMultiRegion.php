@@ -25,6 +25,6 @@ class NoMultiRegion
         // therefore the cookie if the information is no longer needed. The cookie size is limited...
         MultiRegion::cleanUpOldCommitIds();
 
-        return $next($request);
+        return MultiRegion::addServedByHeader($next($request));
     }
 }

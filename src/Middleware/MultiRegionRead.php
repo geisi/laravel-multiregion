@@ -19,9 +19,9 @@ class MultiRegionRead
         MultiRegion::cleanupOldCommitIds();
 
         if (MultiRegion::isPrimary() || MultiRegion::hasCaughtUp()) {
-            return $next($request);
+            return MultiRegion::addServedByHeader($next($request));
         }
 
-        return MultiRegion::replayAtPrimary();
+        return MultiRegion::addServedByHeader(MultiRegion::replayAtPrimary());
     }
 }

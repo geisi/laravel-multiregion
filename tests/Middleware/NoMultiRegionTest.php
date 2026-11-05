@@ -17,6 +17,7 @@ it('passes requests through without multi-region handling', function (MultiRegio
 
     MultiRegion::assertOldCommitIdsCleanedUp();
     MultiRegion::assertWriteRecorded(false);
+    MultiRegion::assertServedByHeaderAdded();
 })->with([
     'primary region' => MultiRegionState::Primary,
     'replica region' => MultiRegionState::ReplicaLagging,

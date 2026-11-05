@@ -19,7 +19,7 @@ class MultiRegionWrite
         MultiRegion::cleanupOldCommitIds();
 
         if (! MultiRegion::isPrimary()) {
-            return MultiRegion::replayAtPrimary();
+            return MultiRegion::addServedByHeader(MultiRegion::replayAtPrimary());
         }
 
         try {
@@ -28,6 +28,6 @@ class MultiRegionWrite
             MultiRegion::recordWrite();
         }
 
-        return $response;
+        return MultiRegion::addServedByHeader($response);
     }
 }

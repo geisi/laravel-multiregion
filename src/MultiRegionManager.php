@@ -97,4 +97,19 @@ class MultiRegionManager
     {
         return app(Driver::class)->replayAtPrimary(Request::instance());
     }
+
+    /**
+     * Add the header identifying the region or machine that answered the request.
+     */
+    public function addServedByHeader(Response $response): Response
+    {
+        $name = config('multiregion.served_by.name');
+        $value = config('multiregion.served_by.value');
+
+        if (filled($name) && filled($value)) {
+            $response->headers->set($name, $value);
+        }
+
+        return $response;
+    }
 }
