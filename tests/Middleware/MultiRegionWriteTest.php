@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Mockery\MockInterface;
+use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Facades\MultiRegion;
 use Tpetry\MultiRegion\Middleware\MultiRegionWrite;
 use Tpetry\MultiRegion\Testing\MultiRegionState;
@@ -36,18 +38,15 @@ describe('primary region', function () {
 });
 
 describe('replica region', function () {
-    it('redirects to the primary region', function () {
+    it('replays the request at the primary region', function () {
         MultiRegion::fake(MultiRegionState::ReplicaCaughtUp);
-        config([
-            'app.url' => 'https://app.test',
-            'multiregion.driver' => 'redirect',
-            'multiregion.drivers.redirect.url.read' => 'https://replica.test',
-            'multiregion.drivers.redirect.url.write' => 'https://primary.test',
-        ]);
+        $response = response('replayed');
+        $this->mock(Driver::class, function (MockInterface $mock) use ($response) {
+            $mock->expects('replayAtPrimary')->andReturn($response);
+        });
 
-        $this->post('/posts?b=2&a=1')
-            ->assertStatus(307)
-            ->assertHeader('Location', 'https://primary.test/posts?b=2&a=1');
+        expect($this->post('/posts')->baseResponse)
+            ->toBe($response);
 
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(false);
