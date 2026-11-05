@@ -1,5 +1,11 @@
 # Release Notes
 
+## [v3.1.0](https://github.com/tpetry/laravel-multiregion/compare/3.0.0...3.1.0) - 2026-11-05
+
+### Added
+
+- A header identifying the region and/or machine that answered the request (e.g. `X-MultiRegion-ServedBy: us-east-server0`).
+
 ## [v3.0.0](https://github.com/tpetry/laravel-multiregion/compare/2.1.0...3.0.0) - 2026-11-05
 
 ### Added
