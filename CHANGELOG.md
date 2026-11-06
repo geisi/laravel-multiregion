@@ -1,5 +1,11 @@
 # Release Notes
 
+## [v3.2.0](https://github.com/tpetry/laravel-multiregion/compare/3.1.0...3.2.0) - 2026-11-06
+
+### Added
+
+- `noop` driver to disable multi-region handling for local development and testing.
+
 ## [v3.1.0](https://github.com/tpetry/laravel-multiregion/compare/3.0.0...3.1.0) - 2026-11-05
 
 ### Added
