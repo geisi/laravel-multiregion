@@ -189,4 +189,27 @@ return [
         'value' => env('MULTIREGION_SERVEDBY_VALUE'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Ignored Routes
+    |--------------------------------------------------------------------------
+    |
+    | Every route must use a multi region middleware to ensure correct
+    | behaviour. The `multiregion:routes` artisan command and pest
+    | architecture test exist to verify it. But some routes are registered by
+    | the framework or packages and definitely don't need any multi-region
+    | settings. You can put them on the ignored list.
+    |
+    | Routes are matched by their URI (starting with a slash, e.g. "/up") or
+    | by their name (e.g. "horizon.*"). Both may contain wildcards.
+    |
+    */
+
+    'ignore' => [
+        '/_boost/*',
+        '/_inertia/*',
+        '/storage/*',
+        '/up',
+    ],
+
 ];

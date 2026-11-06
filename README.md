@@ -42,20 +42,38 @@ pest()->extend(TestCase::class)
     ->in('Feature', 'Arch');
 ```
 
-And create an architecture test, e.g. `tests/Arch/MultiRegionTest.php`:
+Routes registered by the framework or packages can't get the middleware. List them in the `ignore` option of the `config/multiregion.php` configuration file, by their URI (starting with a slash) or their name. Both may contain wildcards:
+
+```php
+'ignore' => [
+    '/_boost/*',
+    '/_inertia/*',
+    '/storage/*',
+    '/up',
+    'horizon.*',
+],
+```
+
+And create an architecture test, e.g. `tests/Arch/MultiRegionTest.php`. It ignores the configured routes, and more can be added with `ignoring()`:
 
 ```php
 arch()
     ->expectRoutes()
     ->toUseMultiRegionMiddleware()
     ->ignoring([
-        '/up',
-        '/storage/*',
         'crm.page.*',
     ]);
 ```
 
-Routes can be ignored by their URI (starting with a slash) or their name. Both may contain wildcards. The test fails for the first route without one of the middleware:
+The test fails for the first route without one of the middleware.
+
+### Listing the multi-region mode of every route
+
+The `multiregion:routes` command lists every route with its multi-region mode: `uses multiRegionRead()` and `uses multiRegionWrite()` in green, `uses noMultiRegion()` in yellow, `ignored (pattern)` (by the configuration) in gray, and `missing` in bold red. It exits with an error code when a route has no multi-region middleware, so it can also be used in CI:
+
+```bash
+php artisan multiregion:routes
+```
 
 ## Changelog
 

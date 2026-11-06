@@ -2,66 +2,50 @@
 
 declare(strict_types=1);
 
-use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\AssertionFailedError;
+use Tpetry\MultiRegion\Facades\RouteInspector;
+use Tpetry\MultiRegion\Routing\RouteMode;
 
+/**
+ * A real route for the architecture test, all other tests use a fake RouteInspector.
+ */
 beforeEach(function () {
-    Route::get('/read', fn () => 'ok')->name('multiregion-read')->multiRegionRead();
-    Route::post('/write', fn () => 'ok')->name('multiregion-write')->multiRegionWrite();
-    Route::get('/no-multiregion', fn () => 'ok')->name('no-multiregion')->noMultiRegion();
-    app(Router::class)->getRoutes()->refreshNameLookups();
+    Route::get('/read', fn () => 'ok')->multiRegionRead();
 });
 
-it('passes when every route uses a multi-region middleware', function () {
+it('passes when no route is missing a multi-region middleware', function () {
+    RouteInspector::fake([
+        ['methods' => ['GET', 'HEAD'], 'uri' => '/read', 'name' => null, 'mode' => RouteMode::MultiRegionRead, 'ignoredBy' => null],
+        ['methods' => ['GET', 'HEAD'], 'uri' => '/write', 'name' => null, 'mode' => RouteMode::MultiRegionWrite, 'ignoredBy' => null],
+        ['methods' => ['GET', 'HEAD'], 'uri' => '/no-multiregion', 'name' => null, 'mode' => RouteMode::NoMultiRegion, 'ignoredBy' => null],
+        ['methods' => ['GET', 'HEAD'], 'uri' => '/ignored', 'name' => null, 'mode' => RouteMode::Ignored, 'ignoredBy' => '/ignored'],
+    ]);
+
     $this->expectRoutes()->toUseMultiRegionMiddleware();
 });
 
-describe('fails when one route is declared without a multi-region middleware', function () {
-    it('shows the route\'s name', function () {
-        Route::get('/missing', fn () => 'ok')->name('missing');
-        app(Router::class)->getRoutes()->refreshNameLookups();
-
-        expect(fn () => $this->expectRoutes()->toUseMultiRegionMiddleware())
-            ->toThrow(AssertionFailedError::class, 'Expecting /missing (missing) to use multi-region middleware.');
-    });
-
-    it('shows only the URI for a route without a name', function () {
-        Route::get('/missing', fn () => 'ok');
-
-        expect(fn () => $this->expectRoutes()->toUseMultiRegionMiddleware())
-            ->toThrow(AssertionFailedError::class, 'Expecting /missing to use multi-region middleware.');
-    });
-});
-
-describe('ignoring()', function () {
-    it('ignores routes by their URI', function (string $pattern) {
-        Route::get('/storage/a/b', fn () => 'ok');
-
-        $this->expectRoutes()->toUseMultiRegionMiddleware()->ignoring($pattern);
-    })->with([
-        'exact' => '/storage/a/b',
-        'wildcard' => '/storage/*',
+it('fails for a route without a multi-region middleware', function (?string $name, string $message) {
+    RouteInspector::fake([
+        ['methods' => ['GET', 'HEAD'], 'uri' => '/read', 'name' => null, 'mode' => RouteMode::MultiRegionRead, 'ignoredBy' => null],
+        ['methods' => ['GET', 'HEAD'], 'uri' => '/missing', 'name' => $name, 'mode' => RouteMode::Missing, 'ignoredBy' => null],
     ]);
 
-    it('ignores routes by their name', function (string $pattern) {
-        Route::name('crm.page.show')->get('/crm', fn () => 'ok');
+    expect(fn () => $this->expectRoutes()->toUseMultiRegionMiddleware())
+        ->toThrow(AssertionFailedError::class, $message);
+})->with([
+    'with name' => ['missing', 'Expecting /missing (missing) to use multi-region middleware.'],
+    'without name' => [null, 'Expecting /missing to use multi-region middleware.'],
+]);
 
-        $this->expectRoutes()->toUseMultiRegionMiddleware()->ignoring($pattern);
-    })->with([
-        'exact' => 'crm.page.show',
-        'wildcard' => 'crm.page.*',
-    ]);
+it('passes the ignoring() patterns to the inspection', function () {
+    $fake = RouteInspector::fake([]);
 
-    it('combines multiple ignoring() calls', function () {
-        Route::get('/storage/a', fn () => 'ok');
-        Route::name('crm.page.show')->get('/crm', fn () => 'ok');
+    $this->expectRoutes()->toUseMultiRegionMiddleware()->ignoring('/storage/*')->ignoring(['crm.page.*', 'horizon.*']);
 
-        $this->expectRoutes()->toUseMultiRegionMiddleware()->ignoring('/storage/*')->ignoring(['crm.page.*']);
-    });
+    $fake->assertInspectedWith(['/storage/*', 'crm.page.*', 'horizon.*']);
 });
 
 arch('works as an architecture test')
     ->expectRoutes()
-    ->toUseMultiRegionMiddleware()
-    ->ignoring(['/up']);
+    ->toUseMultiRegionMiddleware();

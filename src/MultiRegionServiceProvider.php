@@ -10,6 +10,7 @@ use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use LogicException;
+use Tpetry\MultiRegion\Console\RoutesCommand;
 use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Contracts\FormatsRouteHost;
 use Tpetry\MultiRegion\Contracts\Manager;
@@ -50,6 +51,10 @@ class MultiRegionServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/multiregion.php' => config_path('multiregion.php'),
         ], ['multiregion-config']);
+
+        $this->commands([
+            RoutesCommand::class,
+        ]);
     }
 
     protected function buildDriver(Application $app): Driver
