@@ -29,7 +29,10 @@ return [
     | even be different for development than for production, e.g. when no
     | proxy is available locally to replay requests.
     |
-    | Supported: "redirect", "header", "fly"
+    | Use "noop" to disable the multi-region handling, e.g. for local
+    | development or unit testing.
+    |
+    | Supported: "redirect", "header", "fly", "noop"
     |
     */
 

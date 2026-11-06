@@ -15,6 +15,7 @@ it('passes requests through without multi-region handling', function (MultiRegio
         ->assertOk()
         ->assertSee('ok');
 
+    MultiRegion::assertReplayedAtPrimary(false);
     MultiRegion::assertOldCommitIdsCleanedUp();
     MultiRegion::assertWriteRecorded(false);
     MultiRegion::assertServedByHeaderAdded();

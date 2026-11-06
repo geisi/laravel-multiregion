@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Mockery\MockInterface;
-use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Facades\MultiRegion;
 use Tpetry\MultiRegion\Middleware\MultiRegionWrite;
 use Tpetry\MultiRegion\Testing\MultiRegionState;
@@ -21,6 +19,7 @@ describe('primary region', function () {
             ->assertOk()
             ->assertSee('ok');
 
+        MultiRegion::assertReplayedAtPrimary(false);
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(true);
         MultiRegion::assertServedByHeaderAdded();
@@ -33,6 +32,7 @@ describe('primary region', function () {
         $this->post('/failing')
             ->assertServerError();
 
+        MultiRegion::assertReplayedAtPrimary(false);
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(true);
         MultiRegion::assertServedByHeaderAdded();
@@ -41,15 +41,12 @@ describe('primary region', function () {
 
 describe('replica region', function () {
     it('replays the request at the primary region', function () {
-        MultiRegion::fake(MultiRegionState::ReplicaCaughtUp);
-        $response = response('replayed');
-        $this->mock(Driver::class, function (MockInterface $mock) use ($response) {
-            $mock->expects('replayAtPrimary')->andReturn($response);
-        });
+        MultiRegion::fake(MultiRegionState::ReplicaCaughtUp, $response = response('replayed'));
 
         expect($this->post('/posts')->baseResponse)
             ->toBe($response);
 
+        MultiRegion::assertReplayedAtPrimary(true);
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertWriteRecorded(false);
         MultiRegion::assertServedByHeaderAdded();

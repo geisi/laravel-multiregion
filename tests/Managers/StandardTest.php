@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Request;
 use Mockery\MockInterface;
 use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Facades\CommitId;
-use Tpetry\MultiRegion\MultiRegionManager;
+use Tpetry\MultiRegion\Managers\Standard;
 use Tpetry\MultiRegion\Testing\CommitIdState;
 
 beforeEach(function () {
@@ -23,13 +23,13 @@ beforeEach(function () {
 
 describe('isPrimary()', function () {
     it('fails when the region is not configured', function () {
-        (new MultiRegionManager)->isPrimary();
+        (new Standard)->isPrimary();
     })->throws(InvalidArgumentException::class, 'Configuration value for key [multiregion.primary] must be a boolean, NULL given.');
 
     it('is the primary region when configured', function (bool $primary) {
         config(['multiregion.primary' => $primary]);
 
-        expect((new MultiRegionManager)->isPrimary())
+        expect((new Standard)->isPrimary())
             ->toBe($primary);
     })->with([
         'primary' => [true],
@@ -45,7 +45,7 @@ describe('cleanupOldCommitIds()', function () {
                 'multiregion.saved_at' => $now->getTimestampMs() - config()->integer('multiregion.verification.milliseconds') - 1,
             ]);
 
-            (new MultiRegionManager)->cleanupOldCommitIds();
+            (new Standard)->cleanupOldCommitIds();
 
             expect(session()->has('multiregion'))
                 ->toBeFalse();
@@ -59,7 +59,7 @@ describe('cleanupOldCommitIds()', function () {
                 'multiregion.saved_at' => $now->getTimestampMs() - config()->integer('multiregion.verification.milliseconds'),
             ]);
 
-            (new MultiRegionManager)->cleanupOldCommitIds();
+            (new Standard)->cleanupOldCommitIds();
 
             expect(session('multiregion'))
                 ->commit_id->toBe('commit-369')
@@ -72,14 +72,14 @@ describe('recordWrite()', function () {
     it('fails when the session driver is not cookie', function (string $driver) {
         config(['session.driver' => $driver]);
 
-        expect(fn () => (new MultiRegionManager)->recordWrite())
+        expect(fn () => (new Standard)->recordWrite())
             ->toThrow(RuntimeException::class, 'The multi region middleware requires the "cookie" session driver to share the last commit id with all regions.');
     })->with(['array', 'database', 'redis']);
 
     it('fails when a transaction is still open', function () {
         DB::beginTransaction();
 
-        expect(fn () => (new MultiRegionManager)->recordWrite())
+        expect(fn () => (new Standard)->recordWrite())
             ->toThrow(RuntimeException::class, 'The multi region middleware can\'t guarantee read-after-write behavior if a database transaction is still open when trying to get the last commit id.');
     });
 
@@ -87,7 +87,7 @@ describe('recordWrite()', function () {
         CommitId::fake(CommitIdState::CaughtUp);
 
         $this->freezeTime(function (Carbon $now) {
-            (new MultiRegionManager)->recordWrite();
+            (new Standard)->recordWrite();
 
             expect(session('multiregion'))
                 ->commit_id->toBe('commit-4')
@@ -101,7 +101,7 @@ describe('recordWrite()', function () {
         $this->freezeTime(function (Carbon $now) {
             session(['multiregion.commit_id' => 'commit-1', 'multiregion.saved_at' => $now->getTimestampMs() - 1_000]);
 
-            (new MultiRegionManager)->recordWrite();
+            (new Standard)->recordWrite();
 
             expect(session('multiregion'))
                 ->commit_id->toBe('commit-1,commit-4')
@@ -114,7 +114,7 @@ describe('hasCaughtUp()', function () {
     it('has caught up without a previous write', function () {
         CommitId::fake(CommitIdState::Lagging);
 
-        expect((new MultiRegionManager)->hasCaughtUp())
+        expect((new Standard)->hasCaughtUp())
             ->toBeTrue();
 
         CommitId::assertHasCommitIdCalled(null);
@@ -129,7 +129,7 @@ describe('hasCaughtUp()', function () {
                 'multiregion.saved_at' => $now->getTimestampMs() - config()->integer('multiregion.verification.milliseconds') - 1,
             ]);
 
-            expect((new MultiRegionManager)->hasCaughtUp())
+            expect((new Standard)->hasCaughtUp())
                 ->toBeTrue();
         });
 
@@ -142,7 +142,7 @@ describe('hasCaughtUp()', function () {
         $this->freezeTime(function (Carbon $now) {
             session(['multiregion.commit_id' => 'commit-302', 'multiregion.saved_at' => $now->getTimestampMs()]);
 
-            expect((new MultiRegionManager)->hasCaughtUp())
+            expect((new Standard)->hasCaughtUp())
                 ->toBeTrue();
         });
 
@@ -156,7 +156,7 @@ describe('hasCaughtUp()', function () {
         $this->freezeTime(function (Carbon $now) {
             session(['multiregion.commit_id' => 'commit-440', 'multiregion.saved_at' => $now->getTimestampMs() - config()->integer('multiregion.wait.timeout')]);
 
-            expect((new MultiRegionManager)->hasCaughtUp())
+            expect((new Standard)->hasCaughtUp())
                 ->toBeTrue();
         });
 
@@ -169,7 +169,7 @@ describe('hasCaughtUp()', function () {
         $this->freezeTime(function (Carbon $now) {
             session(['multiregion.commit_id' => 'commit-655', 'multiregion.saved_at' => $now->getTimestampMs()]);
 
-            expect((new MultiRegionManager)->hasCaughtUp())
+            expect((new Standard)->hasCaughtUp())
                 ->toBeFalse();
         });
 
@@ -183,7 +183,7 @@ describe('hasCaughtUp()', function () {
         $this->freezeTime(function (Carbon $now) {
             session(['multiregion.commit_id' => 'commit-329', 'multiregion.saved_at' => $now->getTimestampMs() - config()->integer('multiregion.wait.timeout')]);
 
-            expect((new MultiRegionManager)->hasCaughtUp())
+            expect((new Standard)->hasCaughtUp())
                 ->toBeFalse();
         });
 
@@ -200,7 +200,7 @@ describe('replayAtPrimary()', function () {
             $mock->expects('replayAtPrimary')->with($request)->andReturn($response);
         });
 
-        expect((new MultiRegionManager)->replayAtPrimary())
+        expect((new Standard)->replayAtPrimary())
             ->toBe($response);
     });
 });
@@ -212,7 +212,7 @@ describe('addServedByHeader()', function () {
             'multiregion.served_by.value' => 'fra',
         ]);
 
-        expect((new MultiRegionManager)->addServedByHeader(response('ok')))
+        expect((new Standard)->addServedByHeader(response('ok')))
             ->headers->get('X-Region')->toBe('fra');
     });
 
@@ -222,7 +222,7 @@ describe('addServedByHeader()', function () {
             'multiregion.served_by.value' => $value,
         ]);
 
-        expect((new MultiRegionManager)->addServedByHeader(response('ok')))
+        expect((new Standard)->addServedByHeader(response('ok')))
             ->headers->has($name)->toBeFalse();
     })->with([
         'no name' => ['', 'fra'],

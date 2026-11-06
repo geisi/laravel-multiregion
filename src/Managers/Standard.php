@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tpetry\MultiRegion;
+namespace Tpetry\MultiRegion\Managers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
@@ -10,9 +10,10 @@ use Illuminate\Support\Facades\Session;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Tpetry\MultiRegion\Contracts\Driver;
+use Tpetry\MultiRegion\Contracts\Manager;
 use Tpetry\MultiRegion\Facades\CommitId;
 
-class MultiRegionManager
+class Standard implements Manager
 {
     /**
      * Determine if this instance is part of the primary region.

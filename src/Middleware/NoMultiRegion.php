@@ -23,7 +23,7 @@ class NoMultiRegion
     {
         // This is strictly speaking not needed, but it is nevertheless a good idea to clean up the session's value and
         // therefore the cookie if the information is no longer needed. The cookie size is limited...
-        MultiRegion::cleanUpOldCommitIds();
+        MultiRegion::cleanupOldCommitIds();
 
         return MultiRegion::addServedByHeader($next($request));
     }

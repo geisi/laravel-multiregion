@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Mockery\MockInterface;
-use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Facades\MultiRegion;
 use Tpetry\MultiRegion\Middleware\MultiRegionRead;
 use Tpetry\MultiRegion\Testing\MultiRegionState;
@@ -21,6 +19,7 @@ describe('primary region', function () {
             ->assertOk()
             ->assertSee('ok');
 
+        MultiRegion::assertReplayedAtPrimary(false);
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertServedByHeaderAdded();
     });
@@ -34,20 +33,18 @@ describe('replica region', function () {
             ->assertOk()
             ->assertSee('ok');
 
+        MultiRegion::assertReplayedAtPrimary(false);
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertServedByHeaderAdded();
     });
 
     it('replays the request at the primary region when the data has not arrived', function () {
-        MultiRegion::fake(MultiRegionState::ReplicaLagging);
-        $response = response('replayed');
-        $this->mock(Driver::class, function (MockInterface $mock) use ($response) {
-            $mock->expects('replayAtPrimary')->andReturn($response);
-        });
+        MultiRegion::fake(MultiRegionState::ReplicaLagging, $response = response('replayed'));
 
         expect($this->get('/posts')->baseResponse)
             ->toBe($response);
 
+        MultiRegion::assertReplayedAtPrimary(true);
         MultiRegion::assertOldCommitIdsCleanedUp();
         MultiRegion::assertServedByHeaderAdded();
     });
