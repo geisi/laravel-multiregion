@@ -29,9 +29,8 @@ class RouteInspector
         $this->app->make(HttpKernel::class);
         $router = $this->app->make(Router::class);
 
-        /** @var list<string> $configured */
-        $configured = $this->app->make('config')->get('multiregion.ignore', []);
-        $patterns = [...$configured, ...$ignoring];
+        /** @var list<string> $patterns */
+        $patterns = [...$this->app->make('config')->array('multiregion.routes.ignore', []), ...$ignoring];
 
         $routes = [];
         foreach ($router->getRoutes()->getRoutes() as $route) {

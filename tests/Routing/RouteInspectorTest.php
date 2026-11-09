@@ -23,7 +23,7 @@ function inspectRoutes(array $ignoring = []): array
 }
 
 beforeEach(function () {
-    config(['multiregion.ignore' => []]);
+    config(['multiregion.routes' => ['presets' => [], 'ignore' => [], 'custom' => []]]);
 });
 
 it('returns the methods, uri and name of every route', function () {
@@ -93,7 +93,7 @@ describe('ignoring', function () {
     ]);
 
     it('ignores routes from the configuration and the additional patterns', function () {
-        config(['multiregion.ignore' => ['/storage/*']]);
+        config(['multiregion.routes.ignore' => ['/storage/*']]);
         Route::get('/storage/a', fn () => 'ok');
         Route::get('/crm', fn () => 'ok')->name('crm.page.show');
         Route::get('/missing', fn () => 'ok');
@@ -105,7 +105,7 @@ describe('ignoring', function () {
     });
 
     it('reports the first matching pattern', function () {
-        config(['multiregion.ignore' => ['/storage/*', '/storage/a']]);
+        config(['multiregion.routes.ignore' => ['/storage/*', '/storage/a']]);
         Route::get('/storage/a', fn () => 'ok');
 
         expect(inspectRoutes()['/storage/a']['ignoredBy'])->toBe('/storage/*');

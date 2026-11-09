@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tpetry\MultiRegion;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Foundation\CachesRoutes;
 use Illuminate\Routing\PendingResourceRegistration;
 use Illuminate\Routing\PendingSingletonResourceRegistration;
 use Illuminate\Routing\Route;
@@ -23,6 +24,7 @@ use Tpetry\MultiRegion\Helpers\CommitId;
 use Tpetry\MultiRegion\Managers\Noop;
 use Tpetry\MultiRegion\Managers\Standard;
 use Tpetry\MultiRegion\Routing\ResourceMixin;
+use Tpetry\MultiRegion\Routing\RouteConfigurator;
 use Tpetry\MultiRegion\Routing\RouteMixin;
 
 class MultiRegionServiceProvider extends ServiceProvider
@@ -49,6 +51,15 @@ class MultiRegionServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // The configured routes are applied after every service provider has registered its routes, some even register
+        // them in a booted callback (e.g. the local storage routes). Cached routes already include them as the routes
+        // were cached after they have been applied.
+        if (! ($this->app instanceof CachesRoutes && $this->app->routesAreCached())) {
+            $this->app->booted(function (Application $app): void {
+                $app->make(RouteConfigurator::class)->apply();
+            });
+        }
+
         if (! $this->app->runningInConsole()) {
             return;
         }

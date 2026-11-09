@@ -191,26 +191,88 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Ignored Routes
+    | Routes
     |--------------------------------------------------------------------------
     |
-    | Every route must use a multi region middleware to ensure correct
-    | behaviour. The `multiregion:routes` artisan command and pest
-    | architecture test exist to verify it. But some routes are registered by
-    | the framework or packages and definitely don't need any multi-region
-    | settings. You can put them on the ignored list.
-    |
-    | Routes are matched by their URI (starting with a slash, e.g. "/up") or
-    | by their name (e.g. "horizon.*"). Both may contain wildcards.
+    | Every route must have a multi-region setting, which the artisan command
+    | and the Pest architecture test verify. But routes registered by the
+    | framework or packages can't get one in your route files, so they are
+    | configured here instead.
     |
     */
 
-    'ignore' => [
-        '/_boost/*',
-        '/_debugbar/*',
-        '/_inertia/*',
-        '/storage/*',
-        '/up',
+    'routes' => [
+
+        /*
+        |----------------------------------------------------------------------
+        | Presets
+        |----------------------------------------------------------------------
+        |
+        | Multi-region settings for the routes of popular packages are shipped
+        | with this package, enable the ones you use. They only apply to the
+        | routes handled by the package's own controllers. When you replace
+        | them with your own implementation, you have to configure those
+        | routes yourself.
+        |
+        */
+
+        'presets' => [
+            'laravel/fortify' => false,
+            'laravel/passkeys' => false,
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Ignore
+        |----------------------------------------------------------------------
+        |
+        | Routes not needing any multi-region setting, e.g. routes only used
+        | for local development. They are matched by their URL (starting
+        | with a slash, e.g. "/up") or by their name (e.g. "horizon.*").
+        | Both may contain wildcards.
+        |
+        */
+
+        'ignore' => [
+            '/_boost/*', // laravel/boost
+            '/_debugbar/*', // fruitcake/laravel-debugbar
+            '/_inertia/*', // inertiajs/inertia-laravel
+            '/laravel-login-link-login', // spatie/laravel-login-link
+            '/storage/*',
+            '/up',
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Custom
+        |----------------------------------------------------------------------
+        |
+        | Routes of packages without a preset that use the database can't be
+        | ignored, they need a multi-region setting to work correctly. Set
+        | the mode "read", "write" or "none" for them, the route is selected
+        | by its name (e.g. "login.store") or URL (starting with a slash,
+        | e.g. "/login"). Entries not matching any route are skipped.
+        |
+        | The method and action ensure the mode is applied to the correct
+        | route when routes change, e.g. after a package update or reusing a
+        | route name. The method is the HTTP method (e.g. "POST"), and the
+        | action is the controller and method, e.g.
+        | "Laravel\Fortify\Http\Controllers\PasswordController@update", or, for
+        | closure routes, the file defining the closure, e.g.
+        | "vendor/laravel/boost/src/BoostServiceProvider.php". Wildcards can
+        | be used to simplify them, e.g. "Laravel\Fortify\Http\Controllers\*".
+        |
+        */
+
+        'custom' => [
+            // [
+            //     'route' => 'teams.show',
+            //     'action' => 'Laravel\Jetstream\Http\Controllers\Livewire\TeamController@show',
+            //     'method' => 'GET',
+            //     'mode' => 'read',
+            // ],
+        ],
+
     ],
 
 ];
