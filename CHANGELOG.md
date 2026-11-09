@@ -1,5 +1,14 @@
 # Release Notes
 
+## [v4.1.0](https://github.com/tpetry/laravel-multiregion/compare/4.0.0...4.1.0) - 2026-11-09
+
+### Added
+
+- Monitoring of the replication lag between the primary and the replica database:
+  - `MultiRegion::measureLag()` for building manual logic and optional health check URL with automatic checks
+  - Every measurement is stored in a table for later analysis with support for custom attributes
+  - `multiregion:prune` artisan command to delete old measurements, e.g. `multiregion:prune mysql_primary --days=7`.
+
 ## [v4.0.0](https://github.com/tpetry/laravel-multiregion/compare/3.4.0...4.0.0) - 2026-11-09
 
 ### Added
