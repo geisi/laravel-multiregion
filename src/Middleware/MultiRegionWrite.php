@@ -7,7 +7,7 @@ namespace Tpetry\MultiRegion\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Tpetry\MultiRegion\Facades\MultiRegion;
+use Tpetry\MultiRegion\Facades\Manager;
 
 class MultiRegionWrite
 {
@@ -16,18 +16,18 @@ class MultiRegionWrite
      */
     public function handle(Request $request, Closure $next): Response
     {
-        MultiRegion::cleanupOldCommitIds();
+        Manager::cleanupOldCommitIds();
 
-        if (! MultiRegion::isPrimary()) {
-            return MultiRegion::addServedByHeader(MultiRegion::replayAtPrimary());
+        if (! Manager::isPrimary()) {
+            return Manager::addServedByHeader(Manager::replayAtPrimary());
         }
 
         try {
             $response = $next($request);
         } finally {
-            MultiRegion::recordWrite();
+            Manager::recordWrite();
         }
 
-        return MultiRegion::addServedByHeader($response);
+        return Manager::addServedByHeader($response);
     }
 }

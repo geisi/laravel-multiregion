@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tpetry\MultiRegion\Testing;
 
-enum MultiRegionState
+enum ManagerState
 {
     /**
      * The instance is part of the primary region.

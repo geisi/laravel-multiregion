@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert as PHPUnit;
 use Symfony\Component\HttpFoundation\Response;
 use Tpetry\MultiRegion\Contracts\Manager;
 
-class MultiRegionFake implements Fake, Manager
+class ManagerFake implements Fake, Manager
 {
     protected bool $calledRecordWrite = false;
 
@@ -24,13 +24,13 @@ class MultiRegionFake implements Fake, Manager
     protected bool $hasCaughtUp;
 
     public function __construct(
-        MultiRegionState $state,
+        ManagerState $state,
         protected Response $replayResponse,
     ) {
         [$this->isPrimary, $this->hasCaughtUp] = match ($state) {
-            MultiRegionState::Primary => [true, true],
-            MultiRegionState::ReplicaCaughtUp => [false, true],
-            MultiRegionState::ReplicaLagging => [false, false],
+            ManagerState::Primary => [true, true],
+            ManagerState::ReplicaCaughtUp => [false, true],
+            ManagerState::ReplicaLagging => [false, false],
         };
     }
 

@@ -6,9 +6,9 @@ namespace Tpetry\MultiRegion\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Symfony\Component\HttpFoundation\Response;
-use Tpetry\MultiRegion\Contracts\Manager;
-use Tpetry\MultiRegion\Testing\MultiRegionFake;
-use Tpetry\MultiRegion\Testing\MultiRegionState;
+use Tpetry\MultiRegion\Contracts\Manager as ManagerContract;
+use Tpetry\MultiRegion\Testing\ManagerFake;
+use Tpetry\MultiRegion\Testing\ManagerState;
 
 /**
  * @method static bool isPrimary()
@@ -22,20 +22,20 @@ use Tpetry\MultiRegion\Testing\MultiRegionState;
  * @method static void assertOldCommitIdsCleanedUp()
  * @method static void assertServedByHeaderAdded()
  *
- * @see Manager
- * @see MultiRegionFake
+ * @see ManagerContract
+ * @see ManagerFake
  */
-class MultiRegion extends Facade
+class Manager extends Facade
 {
-    public static function fake(MultiRegionState $state, ?Response $replayResponse = null): MultiRegionFake
+    public static function fake(ManagerState $state, ?Response $replayResponse = null): ManagerFake
     {
-        return tap(new MultiRegionFake($state, $replayResponse ?? new Response), function (MultiRegionFake $fake) {
+        return tap(new ManagerFake($state, $replayResponse ?? new Response), function (ManagerFake $fake) {
             static::swap($fake);
         });
     }
 
     protected static function getFacadeAccessor(): string
     {
-        return Manager::class;
+        return ManagerContract::class;
     }
 }

@@ -7,7 +7,7 @@ namespace Tpetry\MultiRegion\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Tpetry\MultiRegion\Facades\MultiRegion;
+use Tpetry\MultiRegion\Facades\Manager;
 
 class MultiRegionRead
 {
@@ -16,12 +16,12 @@ class MultiRegionRead
      */
     public function handle(Request $request, Closure $next): Response
     {
-        MultiRegion::cleanupOldCommitIds();
+        Manager::cleanupOldCommitIds();
 
-        if (MultiRegion::isPrimary() || MultiRegion::hasCaughtUp()) {
-            return MultiRegion::addServedByHeader($next($request));
+        if (Manager::isPrimary() || Manager::hasCaughtUp()) {
+            return Manager::addServedByHeader($next($request));
         }
 
-        return MultiRegion::addServedByHeader(MultiRegion::replayAtPrimary());
+        return Manager::addServedByHeader(Manager::replayAtPrimary());
     }
 }
