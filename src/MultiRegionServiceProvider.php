@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tpetry\MultiRegion;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Routing\PendingResourceRegistration;
+use Illuminate\Routing\PendingSingletonResourceRegistration;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +22,7 @@ use Tpetry\MultiRegion\Drivers\Redirect;
 use Tpetry\MultiRegion\Helpers\CommitId;
 use Tpetry\MultiRegion\Managers\Noop;
 use Tpetry\MultiRegion\Managers\Standard;
+use Tpetry\MultiRegion\Routing\ResourceMixin;
 use Tpetry\MultiRegion\Routing\RouteMixin;
 
 class MultiRegionServiceProvider extends ServiceProvider
@@ -36,6 +39,8 @@ class MultiRegionServiceProvider extends ServiceProvider
         $this->app->singleton(Driver::class, $this->buildDriver(...));
 
         Route::mixin(new RouteMixin);
+        PendingResourceRegistration::mixin(new ResourceMixin);
+        PendingSingletonResourceRegistration::mixin(new ResourceMixin);
 
         $this->callAfterResolving('url', function (UrlGenerator $url): void {
             $url->formatHostUsing($this->formatHost(...));
