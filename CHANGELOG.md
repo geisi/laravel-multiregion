@@ -1,5 +1,18 @@
 # Release Notes
 
+## [v4.0.0](https://github.com/tpetry/laravel-multiregion/compare/3.4.0...4.0.0) - 2026-11-09
+
+### Added
+
+- Multi-region settings for routes registered by the framework or packages, configured with presets and custom routes.
+- Added `/laravel-login-link-login` (`spatie/laravel-login-link`) to the default ignored routes.
+
+### Breaking Changes
+
+- The configuration file has changed. Republish it or update your copy:
+  - `ignore` moved to `routes.ignore`.
+  - `routes.presets` and `routes.custom` are new.
+
 ## [v3.4.0](https://github.com/tpetry/laravel-multiregion/compare/3.3.0...3.4.0) - 2026-11-09
 
 ### Added
