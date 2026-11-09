@@ -207,6 +207,7 @@ return [
 
     'ignore' => [
         '/_boost/*',
+        '/_debugbar/*',
         '/_inertia/*',
         '/storage/*',
         '/up',
