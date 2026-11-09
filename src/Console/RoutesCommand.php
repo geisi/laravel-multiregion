@@ -34,7 +34,8 @@ class RoutesCommand extends Command
 
         $this->table(['Method', 'URL', 'Name', 'Mode'], array_map(function (array $route): array {
             $style = match ($route['mode']) {
-                RouteMode::MultiRegionRead, RouteMode::MultiRegionWrite => 'fg=green',
+                RouteMode::MultiRegionRead => 'fg=cyan',
+                RouteMode::MultiRegionWrite => 'fg=magenta',
                 RouteMode::NoMultiRegion => 'fg=yellow',
                 RouteMode::Ignored => 'fg=gray',
                 RouteMode::Missing => 'fg=red;options=bold',

@@ -69,7 +69,7 @@ The test fails for the first route without one of the middleware.
 
 ### Listing the multi-region mode of every route
 
-The `multiregion:routes` command lists every route with its multi-region mode: `uses multiRegionRead()` and `uses multiRegionWrite()` in green, `uses noMultiRegion()` in yellow, `ignored (pattern)` (by the configuration) in gray, and `missing` in bold red. It exits with an error code when a route has no multi-region middleware, so it can also be used in CI:
+The `multiregion:routes` command lists every route with its multi-region mode: `uses multiRegionRead()` in cyan, `uses multiRegionWrite()` in magenta, `uses noMultiRegion()` in yellow, `ignored (pattern)` (by the configuration) in gray, and `missing` in bold red. It exits with an error code when a route has no multi-region middleware, so it can also be used in CI:
 
 ```bash
 php artisan multiregion:routes

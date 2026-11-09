@@ -24,8 +24,8 @@ it('lists every route colored by its multi-region mode', function () {
         +----------+-----------------+----------------+-------------------------+
         | Method   | URL             | Name           | Mode                    |
         +----------+-----------------+----------------+-------------------------+
-        | \e[32mGET|HEAD\e[39m | \e[32m/read\e[39m           | \e[32mread\e[39m           | \e[32muses multiRegionRead()\e[39m  |
-        | \e[32mPOST\e[39m     | \e[32m/write\e[39m          | \e[32mwrite\e[39m          | \e[32muses multiRegionWrite()\e[39m |
+        | \e[36mGET|HEAD\e[39m | \e[36m/read\e[39m           | \e[36mread\e[39m           | \e[36muses multiRegionRead()\e[39m  |
+        | \e[35mPOST\e[39m     | \e[35m/write\e[39m          | \e[35mwrite\e[39m          | \e[35muses multiRegionWrite()\e[39m |
         | \e[33mGET|HEAD\e[39m | \e[33m/no-multiregion\e[39m | \e[33mno-multiregion\e[39m | \e[33muses noMultiRegion()\e[39m    |
         | \e[90mGET|HEAD\e[39m | \e[90m/ignored\e[39m        | \e[90mignored\e[39m        | \e[90mignored (/ignored)\e[39m      |
         | \e[31;1mGET|HEAD\e[39;22m | \e[31;1m/missing\e[39;22m        | \e[31;1mmissing\e[39;22m        | \e[31;1mmissing\e[39;22m                 |
