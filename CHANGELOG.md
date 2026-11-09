@@ -1,5 +1,16 @@
 # Release Notes
 
+## [v3.4.0](https://github.com/tpetry/laravel-multiregion/compare/3.3.0...3.4.0) - 2026-11-09
+
+### Added
+
+- `multiRegion()` route modifier for resource routes (`Route::resource()`, `Route::apiResource()`, `Route::singleton()` and `Route::apiSingleton()`).
+- Added `/_debugbar/*` to the default ignored routes.
+
+### Changed
+
+- `multiregion:routes` shows read and write routes in different colors to easily distinguish them.
+
 ## [v3.3.0](https://github.com/tpetry/laravel-multiregion/compare/3.2.0...3.3.0) - 2026-11-09
 
 ### Added

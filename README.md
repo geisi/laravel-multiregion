@@ -28,7 +28,27 @@ php artisan vendor:publish --tag="multiregion-config"
 
 ## Usage
 
-<!-- Add a basic usage example here. -->
+Every route must declare whether it reads or writes data, so replica regions know which requests they can handle and which ones must be repeated at the primary region:
+
+```php
+Route::get('/posts', [PostController::class, 'index'])->multiRegionRead();
+Route::post('/posts', [PostController::class, 'store'])->multiRegionWrite();
+Route::get('/up', HealthController::class)->noMultiRegion();
+```
+
+Use `noMultiRegion()` for routes that intentionally don't use multi-region handling, e.g. when they don't use the database.
+
+### Resource routes
+
+Resource routes get `multiRegion()`, which applies `multiRegionRead()` to the `index`, `create`, `show` and `edit` routes and `multiRegionWrite()` to the `store`, `update` and `destroy` routes:
+
+```php
+Route::resource('posts', PostController::class)->multiRegion();
+Route::apiResource('comments', CommentController::class)->multiRegion();
+Route::singleton('profile', ProfileController::class)->multiRegion();
+```
+
+It works with `only()` and `except()`, and replaces the multi-region middleware of a surrounding route group.
 
 ### Testing that every route uses multi-region middleware
 
