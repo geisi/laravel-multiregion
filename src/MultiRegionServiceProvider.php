@@ -13,6 +13,7 @@ use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use LogicException;
+use Tpetry\MultiRegion\Console\PruneCommand;
 use Tpetry\MultiRegion\Console\RoutesCommand;
 use Tpetry\MultiRegion\Contracts\Driver;
 use Tpetry\MultiRegion\Contracts\FormatsRouteHost;
@@ -21,6 +22,7 @@ use Tpetry\MultiRegion\Drivers\FlyReplay;
 use Tpetry\MultiRegion\Drivers\Header;
 use Tpetry\MultiRegion\Drivers\Redirect;
 use Tpetry\MultiRegion\Helpers\CommitId;
+use Tpetry\MultiRegion\Http\Controllers\HealthController;
 use Tpetry\MultiRegion\Managers\Noop;
 use Tpetry\MultiRegion\Managers\Standard;
 use Tpetry\MultiRegion\Routing\ResourceMixin;
@@ -55,6 +57,11 @@ class MultiRegionServiceProvider extends ServiceProvider
         // them in a booted callback (e.g. the local storage routes). Cached routes already include them as the routes
         // were cached after they have been applied.
         if (! ($this->app instanceof CachesRoutes && $this->app->routesAreCached())) {
+            if (filled($url = $this->app->make('config')->get('multiregion.monitoring.health.url'))) {
+                /** @var string $url */
+                $this->app->make('router')->get($url, HealthController::class)->name('multiregion.health')->noMultiRegion();
+            }
+
             $this->app->booted(function (Application $app): void {
                 $app->make(RouteConfigurator::class)->apply();
             });
@@ -73,6 +80,7 @@ class MultiRegionServiceProvider extends ServiceProvider
         ], ['multiregion-migrations']);
 
         $this->commands([
+            PruneCommand::class,
             RoutesCommand::class,
         ]);
     }

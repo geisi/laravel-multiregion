@@ -12,8 +12,8 @@ return new class extends Migration
     {
         Schema::create('multiregion_lags', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->unsignedInteger('delay')->nullable();
+            $table->jsonb('attributes');
             $table->timestamps();
         });
     }

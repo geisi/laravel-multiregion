@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tpetry\MultiRegion\Models;
+namespace Tpetry\MultiRegion\Monitoring;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -11,13 +11,13 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $name
  * @property int|null $delay
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property array<string, mixed> $attributes
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 #[Table('multiregion_lags')]
-#[Fillable(['name', 'delay'])]
+#[Fillable(['delay', 'attributes'])]
 class Lag extends Model
 {
     /**
@@ -27,6 +27,7 @@ class Lag extends Model
     {
         return [
             'delay' => 'integer',
+            'attributes' => 'array',
         ];
     }
 }

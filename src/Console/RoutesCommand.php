@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tpetry\MultiRegion\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\TableStyle;
@@ -11,18 +13,10 @@ use Tpetry\MultiRegion\Facades\RouteInspector;
 use Tpetry\MultiRegion\Routing\RouteMode;
 
 #[AsCommand(name: 'multiregion:routes')]
+#[Signature('multiregion:routes')]
+#[Description('List all routes with their multi-region mode')]
 class RoutesCommand extends Command
 {
-    /**
-     * @var string
-     */
-    protected $signature = 'multiregion:routes';
-
-    /**
-     * @var string
-     */
-    protected $description = 'List all routes with their multi-region mode';
-
     public function handle(): int
     {
         $routes = RouteInspector::inspect();

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Tpetry\MultiRegion\Monitoring\LagFactory;
 
 return [
 
@@ -171,6 +172,43 @@ return [
 
     'verification' => [
         'milliseconds' => (int) env('MULTIREGION_VERIFICATION_MILLISECONDS', 30_000),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Monitoring
+    |--------------------------------------------------------------------------
+    |
+    | The replication lag is measured by writing an entry to the primary
+    | database and waiting until the change has arrived at the replica
+    | database. Every measurement is stored in the database, so you can
+    | monitor the lag over time. Schedule the multiregion:prune command to
+    | delete old measurements, e.g. "multiregion:prune mysql_primary --days=7".
+    |
+    | An optional health check URL can be enabled. It waits up to a number of
+    | seconds for the entry to be replicated and is only healthy when the lag
+    | is below a number of milliseconds. When you need more advanced rules or
+    | want to integrate it into your other health checks, build your own with
+    | MultiRegion::measureLag(). PostgreSQL before 19 can't wait for the
+    | replication, so it is checked repeatedly with a pause of a number of
+    | milliseconds between the checks until the data reached the replica.
+    |
+    */
+
+    'monitoring' => [
+        'model' => [
+            'factory' => LagFactory::class,
+            'attributes' => [
+                // 'region' => env('INSTANCE_REGION'),
+            ],
+        ],
+        'sleep_milliseconds' => (int) env('MULTIREGION_MONITORING_SLEEP_MILLISECONDS', 50),
+        'health' => [
+            'url' => env('MULTIREGION_MONITORING_HEALTH_URL'),
+            'primary_connection' => 'name-of-the-primary-connection',
+            'wait_seconds' => (int) env('MULTIREGION_MONITORING_HEALTH_WAIT_SECONDS', 10),
+            'healthy_milliseconds' => (int) env('MULTIREGION_MONITORING_HEALTH_HEALTHY_MILLISECONDS', 1_000),
+        ],
     ],
 
     /*
