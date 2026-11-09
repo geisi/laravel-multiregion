@@ -1,5 +1,16 @@
 # Release Notes
 
+## [v3.3.0](https://github.com/tpetry/laravel-multiregion/compare/3.2.0...3.3.0) - 2026-11-09
+
+### Added
+
+- `multiregion:routes` artisan command to list every route with its multi-region mode.
+- `ignore` configuration option for routes (used by Pest architecture tests and `multiregion:routes`).
+
+### Changed
+
+- Bumped minimum Laravel dependency from 13.0 to 13.40 as the commit IDs of MySQL, MariaDB and PostgreSQL are now provided by Laravel itself.
+
 ## [v3.2.0](https://github.com/tpetry/laravel-multiregion/compare/3.1.0...3.2.0) - 2026-11-06
 
 ### Added
