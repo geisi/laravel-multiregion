@@ -68,6 +68,10 @@ class MultiRegionServiceProvider extends ServiceProvider
             __DIR__.'/../config/multiregion.php' => config_path('multiregion.php'),
         ], ['multiregion-config']);
 
+        $this->publishesMigrations([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], ['multiregion-migrations']);
+
         $this->commands([
             RoutesCommand::class,
         ]);
